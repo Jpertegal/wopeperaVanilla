@@ -5,6 +5,4 @@ if (!isset($_SESSION['user'])) {
     exit();
 }
 
-echo '<h1>Hola ' . $_SESSION['user'] . '<h1>';
-?>
-<form action="../phpScripts/auth/logout.php"><button>Log out</button></form>
+echo '<h1>Hola '. $_SESSION['user'] .'<h1>';
