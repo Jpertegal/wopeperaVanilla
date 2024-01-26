@@ -48,7 +48,7 @@ if (!isset($_SESSION['user'])) {
 <body>
 <div class="form-structor">
 	<form class="signup" method="POST">
-		<h2 class="form-title" id="signup">Sign up</h2>
+		<h2 class="form-title" id="signup">Sign up PUTAAA</h2>
 		<div class="form-holder">
 			<input name="username"type="text" class="input" placeholder="Username" required />
             <input name="firstname" type="text" class="input" placeholder="First Name" />
