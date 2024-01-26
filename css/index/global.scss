@@ -293,3 +293,11 @@ body {
     background-position: 0% 50%;
   }
 }
+
+.logo {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100px; /* Assegura que la imatge ocupi tot l'ample del seu contenidor */
+  max-height: auto; /* Limita l'altura de la imatge (ajusta segons necessitat) */
+}

@@ -46,9 +46,10 @@ if (!isset($_SESSION['user'])) {
     <link rel="stylesheet" href="./css/index/global.scss">
 </head>
 <body>
+<img class="logo" src="./css/imgs/logo.png" alt="Imatge logo Wopepera" />
 <div class="form-structor">
 	<form class="signup" method="POST">
-		<h2 class="form-title" id="signup">Sign up PUTAAA</h2>
+		<h2 class="form-title" id="signup">Sign up</h2>
 		<div class="form-holder">
 			<input name="username"type="text" class="input" placeholder="Username" required />
             <input name="firstname" type="text" class="input" placeholder="First Name" />
