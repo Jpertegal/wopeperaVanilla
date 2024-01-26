@@ -16,7 +16,7 @@ loginBtn.addEventListener('click', (e) => {
 signupBtn.addEventListener('click', (e) => {
 	let parent = e.target.parentNode;
 	Array.from(e.target.parentNode.classList).find((element) => {
-		if(element !== "slide-up") {
+		if(element !== "slide-up" && loginBtn.classList.contains('slide-up')) {
 			parent.classList.add('slide-up')
 		}else{
 			loginBtn.parentNode.parentNode.classList.add('slide-up')
