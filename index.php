@@ -56,7 +56,7 @@ if (!isset($_SESSION['user'])) {
 			<input name="email" type="email" class="input" placeholder="Email" required />
 			<input name="pass" type="password" class="input" placeholder="Password" required />
 		</div>
-		<button class="submit-btn">Sign up</button>
+		<button class="submit-btn">Sign up Warra</button>
 	</form>
 	<form class="login slide-up" method="POST">
 		<div class="center">
