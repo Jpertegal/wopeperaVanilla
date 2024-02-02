@@ -36,6 +36,7 @@ function verificarUsuariBD($email, $pass)
     }
 }
 
+
 function insertarUsuari($username, $firstName, $lastName, $email, $pass)
 {
     $result = false;
@@ -47,6 +48,23 @@ function insertarUsuari($username, $firstName, $lastName, $email, $pass)
         $pass = password_hash($pass, PASSWORD_DEFAULT);
         $fitxar = $conn->prepare($sql);
         $fitxar->execute([':username' => $username, ':firstName' => $firstName, ':lastName' => $lastName, ':email' => $email, ':pass' => $pass]);
+        $result = $fitxar->rowCount() == 1;
+    } catch (PDOException $e) {
+        echo "<p style=\"color:red;\">Error " . $e->getMessage() . "</p>";
+    } finally {
+        return $result;
+    }
+}
+
+
+function updateLogin($idUsuari)
+{
+    $result = false;
+    $conn = getDBConnection();
+    $sql = "UPDATE users SET lastSignIn = now() WHERE idUser = :id";
+    try {
+        $fitxar = $conn->prepare($sql);
+        $fitxar->execute([':id' => $idUsuari]);
         $result = $fitxar->rowCount() == 1;
     } catch (PDOException $e) {
         echo "<p style=\"color:red;\">Error " . $e->getMessage() . "</p>";
