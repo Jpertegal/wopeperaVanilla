@@ -36,7 +36,7 @@ function verificarUsuariBD($email, $pass)
     }
 }
 
-
+/*
 function insertarUsuari($username, $firstName, $lastName, $email, $pass)
 {
     $result = false;
@@ -55,7 +55,79 @@ function insertarUsuari($username, $firstName, $lastName, $email, $pass)
         return $result;
     }
 }
+*/
+function insertarUsuari($username, $firstName, $lastName, $email, $pass)
+{
+    $result = false;
+    $conn = getDBConnection();
+    
+    // Generar valor aleatori i hash
+    $valorAleatorioYHash = generarValorAleatorioYHash();
+    $valorAleatorio = $valorAleatorioYHash['valor_aleatorio'];
+    $hashValorAleatorio = $valorAleatorioYHash['hash_valor_aleatorio'];
+    
+    $activationLink = "http://localhost/mailCheckAccount.php?code=$hashValorAleatorio&mail=$email";
 
+    try {
+        $pass = password_hash($pass, PASSWORD_DEFAULT);
+        $sql = "INSERT INTO `users` (`username`, `userFirstName`, `userLastName`, `mail`, `passHash`, `creationDate`, `removeDate`, `lastSignIn`, `active`, `activationCode`, `activationLink`)
+        VALUES (:username, :firstName, :lastName, :email, :pass, NOW(), null, null, 0, :activationCode, :activationLink)";
+        
+        $fitxar = $conn->prepare($sql);
+        $fitxar->execute([':username' => $username, ':firstName' => $firstName, ':lastName' => $lastName, ':email' => $email, ':pass' => $pass, ':activationCode' => $hashValorAleatorio, ':activationLink' => $activationLink]);
+        $result = $fitxar->rowCount() == 1;
+
+        if ($result) {
+            // Enviam el correu electrònic de benvinguda amb PHPMailer
+            $subject = "Confirmació de registre a la plataforma Wopepera";
+            $message = "
+                <html>
+                <head>
+                    <title>Benvingut a Wopepera</title>
+                </head>
+                <body>
+                    <p>Gràcies per registrar-te a la nostra plataforma. Us donem la benvinguda a bord.</p>
+                    <p>Fes clic al següent enllaç per activar el teu compte:</p>
+                    <p><a href=\"$activationLink\">Active your account now!</a></p>
+                    <img src='/css/imgs/logo.png' alt='Imatge Corporativa Wopepera'>
+                </body>
+                </html>
+            ";
+
+            // Configuració de PHPMailer
+            require 'PHPMailer/PHPMailer.php';
+            require 'PHPMailer/Exception.php';
+            require 'PHPMailer/SMTP.php';
+
+            $mail = new PHPMailer(true);
+
+            $mail->isSMTP();
+            $mail->Host       = 'smtp.gmail.com';
+            $mail->SMTPAuth   = true;
+            $mail->Username   = 'el_teu_correu_electrònic';
+            $mail->Password   = 'la_tua_contrassenya';
+            $mail->SMTPSecure = 'tls';
+            $mail->Port       = 587;
+
+            $mail->setFrom('el_teu_correu_electrònic', 'Wopepera Inc.');
+            $mail->addAddress($email, $firstName . ' ' . $lastName);
+            $mail->isHTML(true);
+            $mail->Subject = $subject;
+            $mail->Body    = $message;
+
+            $mail->send();
+            echo 'Correu electrònic enviat correctament';
+        }
+    } catch (PDOException $e) {
+        echo "<p style=\"color:red;\">Error en inserir l'usuari: " . $e->getMessage() . "</p>";
+    } catch (Exception $e) {
+        echo "Error en enviar el correu electrònic: {$e->getMessage()}";
+    } finally {
+        // Tanquem la connexió
+        $conn = null;
+        return $result;
+    }
+}
 
 function updateLogin($idUsuari)
 {
