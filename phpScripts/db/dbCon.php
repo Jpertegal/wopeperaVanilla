@@ -129,6 +129,16 @@ function insertarUsuari($username, $firstName, $lastName, $email, $pass)
     }
 }
 
+function generarValorAleatorioYHash() {
+    $valorAleatorio = bin2hex(random_bytes(32)); // Ajustado a 32 bytes para obtener una cadena de 64 caracteres
+    $hashValorAleatorio = hash('sha256', $valorAleatorio);
+    
+    return array(
+        'valor_aleatorio' => $valorAleatorio,
+        'hash_valor_aleatorio' => $hashValorAleatorio
+    );
+}
+
 function updateLogin($idUsuari)
 {
     $result = false;
