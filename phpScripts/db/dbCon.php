@@ -1,4 +1,7 @@
 <?php
+use PHPMailer\PHPMailer\PHPMailer;
+require 'vendor/autoload.php';
+
 function getDBConnection()
 {
     $connString = 'mysql:host=localhost;port=3308;dbname=isitec';
@@ -66,15 +69,15 @@ function insertarUsuari($username, $firstName, $lastName, $email, $pass)
     $valorAleatorio = $valorAleatorioYHash['valor_aleatorio'];
     $hashValorAleatorio = $valorAleatorioYHash['hash_valor_aleatorio'];
     
-    $activationLink = "http://localhost/mailCheckAccount.php?code=$hashValorAleatorio&mail=$email";
+    $activationLink = "http://localhost:90/phpScripts/auth/mailCheckAccount.php?code=$hashValorAleatorio&mail=$email";
 
     try {
         $pass = password_hash($pass, PASSWORD_DEFAULT);
-        $sql = "INSERT INTO `users` (`username`, `userFirstName`, `userLastName`, `mail`, `passHash`, `creationDate`, `removeDate`, `lastSignIn`, `active`, `activationCode`, `activationLink`)
-        VALUES (:username, :firstName, :lastName, :email, :pass, NOW(), null, null, 0, :activationCode, :activationLink)";
+        $sql = "INSERT INTO `users` (`username`, `userFirstName`, `userLastName`, `mail`, `passHash`, `creationDate`, `removeDate`, `lastSignIn`, `active`, `activationCode`)
+        VALUES (:username, :firstName, :lastName, :email, :pass, NOW(), null, null, 0, :activationCode)";
         
         $fitxar = $conn->prepare($sql);
-        $fitxar->execute([':username' => $username, ':firstName' => $firstName, ':lastName' => $lastName, ':email' => $email, ':pass' => $pass, ':activationCode' => $hashValorAleatorio, ':activationLink' => $activationLink]);
+        $fitxar->execute([':username' => $username, ':firstName' => $firstName, ':lastName' => $lastName, ':email' => $email, ':pass' => $pass, ':activationCode' => $hashValorAleatorio]);
         $result = $fitxar->rowCount() == 1;
 
         if ($result) {
@@ -89,33 +92,42 @@ function insertarUsuari($username, $firstName, $lastName, $email, $pass)
                     <p>Gràcies per registrar-te a la nostra plataforma. Us donem la benvinguda a bord.</p>
                     <p>Fes clic al següent enllaç per activar el teu compte:</p>
                     <p><a href=\"$activationLink\">Active your account now!</a></p>
-                    <img src='/css/imgs/logo.png' alt='Imatge Corporativa Wopepera'>
+                    <img src='../../css/imgs/logo.png' alt='Imatge Corporativa Wopepera'>
                 </body>
                 </html>
             ";
 
-            // Configuració de PHPMailer
-            require 'PHPMailer/PHPMailer.php';
-            require 'PHPMailer/Exception.php';
-            require 'PHPMailer/SMTP.php';
+            
 
-            $mail = new PHPMailer(true);
+            $mail = new PHPMailer();
 
             $mail->isSMTP();
             $mail->Host       = 'smtp.gmail.com';
             $mail->SMTPAuth   = true;
-            $mail->Username   = 'el_teu_correu_electrònic';
-            $mail->Password   = 'la_tua_contrassenya';
-            $mail->SMTPSecure = 'tls';
-            $mail->Port       = 587;
+            $mail->CharSet    = 'UTF-8';
+            $mail->SMTPDebug  = 2;  
+            $mail->Username   = 'wopepera@gmail.com';
+            $mail->Password   = 'vufh kmct grkb pikv';
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+            //$mail->SMTPSecure = 'tls';
+            $mail->Port       = 465;
 
-            $mail->setFrom('el_teu_correu_electrònic', 'Wopepera Inc.');
+            $mail->setFrom($mail->Username, 'Wopepera Inc.');
             $mail->addAddress($email, $firstName . ' ' . $lastName);
             $mail->isHTML(true);
             $mail->Subject = $subject;
             $mail->Body    = $message;
 
+            $dumpy = var_dump($mail);
+
+            echo $dumpy;
+
             $mail->send();
+            if(!$result){
+                echo 'Error: ' . $mail->ErrorInfo;
+            }else{
+                echo "Correu enviat";
+            }
             echo 'Correu electrònic enviat correctament';
         }
     } catch (PDOException $e) {
@@ -148,6 +160,24 @@ function updateLogin($idUsuari)
         $fitxar = $conn->prepare($sql);
         $fitxar->execute([':id' => $idUsuari]);
         $result = $fitxar->rowCount() == 1;
+    } catch (PDOException $e) {
+        echo "<p style=\"color:red;\">Error " . $e->getMessage() . "</p>";
+    } finally {
+        return $result;
+    }
+}
+
+function usuariexistent($email, $username)
+{
+    $result = false;
+    $conn = getDBConnection();
+    $sql = "SELECT `idUser` FROM `users` WHERE `mail`=:email OR `username`=:username";
+    try {
+        $usuaris = $conn->prepare($sql);
+        $usuaris->execute([':email' => $email, ':username' => $username]);
+        if ($usuaris->rowCount() == 1) {
+            $result = true;
+        }
     } catch (PDOException $e) {
         echo "<p style=\"color:red;\">Error " . $e->getMessage() . "</p>";
     } finally {
